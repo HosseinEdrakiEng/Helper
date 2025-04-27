@@ -38,7 +38,7 @@ namespace Helper
             return services;
         }
 
-        public static IServiceCollection AddHttpLogging(this IServiceCollection services)
+        public static IServiceCollection AddReqResLogging(this IServiceCollection services)
         {
             services.AddHttpLogging((logger) =>
             {
