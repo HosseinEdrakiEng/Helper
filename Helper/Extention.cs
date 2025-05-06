@@ -66,5 +66,18 @@ namespace Helper
             }
             return result;
         }
+
+        public static string GenerateRandomCode(int length = 6)
+        {
+            Random random = new Random();
+            int min = (int)Math.Pow(10, length - 1);
+            int max = (int)Math.Pow(10, length) - 1;
+
+            int randomNumber = random.Next(min, max + 1);
+
+            return randomNumber.ToString();
+        }
     }
+
+
 }
