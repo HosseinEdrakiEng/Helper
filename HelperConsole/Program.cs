@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
+
+
 var services = ConfigureServices();
 
 //var minioService = services.GetRequiredService<IMinioClientFactory>();
@@ -8,11 +10,11 @@ var services = ConfigureServices();
 //var isExist = await minioClient.ListBucketsAsync();
 
 //var serviceminio = services.GetService<IMinioService>();
-////await serviceminio.PutObjectAsync(default);
+//await serviceminio.PutObjectAsync(default);
 
 //var byteContent = await serviceminio.GetObjectAsync(default);
 
-Console.ReadLine(); 
+Console.ReadLine();
 
 static IServiceProvider ConfigureServices()
 {
