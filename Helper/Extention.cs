@@ -1,10 +1,25 @@
-﻿using System.Text;
+﻿using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 
 namespace Helper
 {
     public static class Extention
     {
+        public static string GetClientId(this HttpContext httpContext)
+        {
+            return httpContext.User.Claims.FirstOrDefault(c => c.Type == "azp")?.Value;
+        }
+        public static string GetUserId(this HttpContext httpContext)
+        {
+            return httpContext.User.Claims.FirstOrDefault(r => r.Type == ClaimTypes.NameIdentifier)?.Value;
+        }
+        public static List<string> GetUserRoles(this HttpContext httpContext)
+        {
+            return [.. httpContext.User.Claims?.Where(r => r.Type == ClaimTypes.Role)?.Select(r => r.Value)];
+        }
+
         public static string SerializeAsJson(this object model, JsonSerializerOptions option = null)
         {
             return JsonSerializer.Serialize(model, options: option ?? new JsonSerializerOptions());
