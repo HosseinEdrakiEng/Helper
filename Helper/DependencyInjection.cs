@@ -68,7 +68,7 @@ namespace Helper
             return services;
         }
 
-        public static IServiceCollection AddSsoConfig(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddSsoConfig(this IServiceCollection services, IConfiguration configuration, string audience)
         {
             var ssoConfig = configuration.GetSection("SsoConfig").Get<SsoConfig>();
 
@@ -84,12 +84,13 @@ namespace Helper
                     o.MetadataAddress = ssoConfig.MetadataAddress;
                     o.Authority = ssoConfig.Authority;
                     o.RequireHttpsMetadata = false;
+                    o.Audience = audience;
                     o.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateAudience = false,
+                        ValidateAudience = true,
                         ValidIssuer = ssoConfig.ValidIssuer,
-                        ValidateIssuerSigningKey = true,
                         ValidateIssuer = true,
+                        ValidateIssuerSigningKey = true,
                         IssuerSigningKey = rsaSecurityKey,
                         ValidateLifetime = true,
                     };
