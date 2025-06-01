@@ -11,6 +11,22 @@ namespace Helper
         {
             return httpContext.User.Claims.FirstOrDefault(c => c.Type == "azp")?.Value;
         }
+        public static string GeUsertLevel(this HttpContext httpContext)
+        {
+            return httpContext.User.Claims.FirstOrDefault(c => c.Type == "level")?.Value;
+        }
+        public static string GetUserScore(this HttpContext httpContext)
+        {
+            return httpContext.User.Claims.FirstOrDefault(c => c.Type == "score")?.Value;
+        }
+        public static string GetUserPhonenumber(this HttpContext httpContext)
+        {
+            return httpContext.User.Claims.FirstOrDefault(c => c.Type == "phone_number")?.Value;
+        }
+        public static string GetGroupId(this HttpContext httpContext)
+        {
+            return httpContext.User.Claims.FirstOrDefault(c => c.Type == "groupId")?.Value;
+        }
         public static string GetUserId(this HttpContext httpContext)
         {
             return httpContext.User.Claims.FirstOrDefault(r => r.Type == ClaimTypes.NameIdentifier)?.Value;

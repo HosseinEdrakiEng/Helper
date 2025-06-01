@@ -1,5 +1,6 @@
 ﻿using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -99,11 +100,22 @@ namespace Helper
             return services;
         }
 
-        public static IServiceCollection AddProviderHttpClient(this IServiceCollection services, IConfiguration configuration, string clientName, string configSectionName)
+        public static IServiceCollection AddProviderHttpClient(this IServiceCollection services, IConfiguration configuration, string clientName, string configSectionName, bool internalCommunication = false)
         {
             var config = configuration.GetSection(configSectionName).Get<BaseHttpClientConfig>();
+
             services.AddHttpClient(clientName, o =>
             {
+                if (internalCommunication)
+                {
+                    var httpContext = services.BuildServiceProvider().GetRequiredService<IHttpContextAccessor>();
+                    var token = httpContext.HttpContext?.Request.Headers.Authorization.FirstOrDefault()?.Split(" ")?.Last();
+                    if (token is not null)
+                    {
+                        o.DefaultRequestHeaders.TryAddWithoutValidation("Bearer ", token);
+                    }
+                }
+
                 o.BaseAddress = new Uri(config.BaseUrl);
                 o.Timeout = config.Timeout;
             }).ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
