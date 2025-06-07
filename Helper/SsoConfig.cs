@@ -16,7 +16,7 @@
         public string Authority { get; set; }
         public string ValidIssuer { get; set; }
         public string ResetPasswordUrl { get; set; }
-        public string PositronUUId { get; set; }
+        public string GetClientUrl { get; set; }
         public string ClientRoleUrl { get; set; }
         public string AssignRoleUrl { get; set; }
     }

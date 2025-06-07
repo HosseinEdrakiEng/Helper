@@ -27,6 +27,10 @@ namespace Helper
         {
             return httpContext.User.Claims.FirstOrDefault(c => c.Type == "groupId")?.Value;
         }
+        public static string GetUserNationalCode(this HttpContext httpContext)
+        {
+            return httpContext.User.Claims.FirstOrDefault(c => c.Type == "nationalCode")?.Value;
+        }
         public static string GetUserId(this HttpContext httpContext)
         {
             return httpContext.User.Claims.FirstOrDefault(r => r.Type == ClaimTypes.NameIdentifier)?.Value;
