@@ -125,7 +125,6 @@ namespace Helper
 
             var selector = "new (" + string.Join(", ", fields) + ")";
             var query = source.Select(selector);
-
             return await query.ToDynamicListAsync();
 
             /*Sample

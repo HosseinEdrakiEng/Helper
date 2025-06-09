@@ -10,7 +10,7 @@
     <Description>this library is some helper methods for implement positron services</Description>
     <PackageId>Positron.Helper</PackageId>
     <Product>Positron.Helper</Product>
-	<Version>1.0.9</Version>
+	<Version>1.1.0</Version>
   </PropertyGroup>
 
 	<ItemGroup>
