@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -112,7 +113,29 @@ namespace Helper
 
             return randomNumber.ToString();
         }
+
+        public static async Task<List<dynamic>> SelectFieldsAsync<T>(this IQueryable<T> source, params string[] fields)
+        {
+            if (fields is null || fields.Length == 0)
+                throw new ArgumentException("You must specify at least one field");
+
+            var selector = "new (" + string.Join(", ", fields) + ")";
+            var query = source.Select(selector);
+
+            return await query.ToDynamicListAsync();
+
+            /*Sample
+             * 
+             * var products = await _context.Products
+                    .Where(p => p.Price > 100)
+                    .SelectFieldsAsync("Name", "Price");
+
+                foreach (var p in products)
+                {
+                    Console.WriteLine($"{p.Name} - {p.Price}");
+                }
+
+             */
+        }
     }
-
-
 }

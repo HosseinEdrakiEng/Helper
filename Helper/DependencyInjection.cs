@@ -88,7 +88,7 @@ namespace Helper
                     o.Audience = audience;
                     o.TokenValidationParameters = new TokenValidationParameters
                     {
-                        ValidateAudience = true,
+                        ValidateAudience = !string.IsNullOrWhiteSpace(audience),
                         ValidIssuer = ssoConfig.ValidIssuer,
                         ValidateIssuer = true,
                         ValidateIssuerSigningKey = true,
