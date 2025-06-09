@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System.Collections.Concurrent;
 using System.Linq.Dynamic.Core;
+using System.Reflection;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -8,6 +10,8 @@ namespace Helper
 {
     public static class Extention
     {
+        private static readonly ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> PropertyCache = new();
+
         public static string GetClientId(this HttpContext httpContext)
         {
             return httpContext.User.Claims.FirstOrDefault(c => c.Type == "azp")?.Value;
@@ -136,6 +140,45 @@ namespace Helper
                 }
 
              */
+        }
+
+        public static async Task<List<T>> SelectDynamicAsTypeAsync<T>(this IQueryable<T> source, params string[] fields) where T : new()
+        {
+            if (fields == null || fields.Length == 0)
+                throw new ArgumentException("Fields must be specified", nameof(fields));
+
+            var selector = "new (" + string.Join(", ", fields) + ")";
+            var projected = await source.Select(selector).ToDynamicListAsync();
+            var type = typeof(T);
+            var properties = PropertyCache.GetOrAdd(type, t =>
+                t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                 .Where(p => p.CanWrite)
+                 .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase)
+            );
+
+            var result = new List<T>();
+
+            foreach (var item in projected)
+            {
+                var newObj = new T();
+
+                foreach (var field in fields)
+                {
+                    if (properties.TryGetValue(field, out var targetProp))
+                    {
+                        var sourceProp = item.GetType().GetProperty(field);
+                        if (sourceProp != null)
+                        {
+                            var value = sourceProp.GetValue(item);
+                            targetProp.SetValue(newObj, value);
+                        }
+                    }
+                }
+
+                result.Add(newObj);
+            }
+
+            return result;
         }
     }
 }
