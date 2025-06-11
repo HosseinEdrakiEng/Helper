@@ -112,7 +112,7 @@ namespace Helper
                     var token = httpContext.HttpContext?.Request.Headers.Authorization.FirstOrDefault()?.Split(" ")?.Last();
                     if (token is not null)
                     {
-                        o.DefaultRequestHeaders.TryAddWithoutValidation("Bearer ", token);
+                        o.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                     }
                 }
 

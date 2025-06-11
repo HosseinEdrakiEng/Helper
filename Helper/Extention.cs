@@ -118,6 +118,13 @@ namespace Helper
             return randomNumber.ToString();
         }
 
+        public static JsonSerializerOptions DefaultOptions =>
+            new()
+            {
+                PropertyNameCaseInsensitive = false,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+            };
+
         public static async Task<List<dynamic>> SelectFieldsAsync<T>(this IQueryable<T> source, params string[] fields)
         {
             if (fields is null || fields.Length == 0)
@@ -178,6 +185,72 @@ namespace Helper
             }
 
             return result;
+        }
+
+        public static async Task<List<T>> SelectDynamicAsTypeWithAliasAsync<T>(this IQueryable source, params string[] fields) where T : new()
+        {
+            if (fields == null || fields.Length == 0)
+                throw new ArgumentException("Fields must be specified", nameof(fields));
+
+            var selector = "new (" + string.Join(", ", fields) + ")";
+            var projected = await source.Select(selector).ToDynamicListAsync();
+            var type = typeof(T);
+            var properties = PropertyCache.GetOrAdd(type, t =>
+                t.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                 .Where(p => p.CanWrite)
+                 .ToDictionary(p => p.Name, p => p, StringComparer.OrdinalIgnoreCase)
+            );
+
+            var result = new List<T>();
+
+            foreach (var item in projected)
+            {
+                var newObj = new T();
+
+                foreach (var field in fields)
+                {
+                    var alias = field.Contains(" as ", StringComparison.OrdinalIgnoreCase)
+                        ? field.Substring(field.IndexOf(" as ", StringComparison.OrdinalIgnoreCase) + 4).Trim()
+                        : field.Trim();
+
+                    if (properties.TryGetValue(alias, out var targetProp))
+                    {
+                        var sourceProp = item.GetType().GetProperty(alias);
+                        if (sourceProp != null)
+                        {
+                            var value = sourceProp.GetValue(item);
+                            targetProp.SetValue(newObj, value);
+                        }
+                    }
+                }
+
+                result.Add(newObj);
+            }
+
+            return result;
+
+            /*
+             var query = from t1 in dbContext.Table1
+            join t2 in dbContext.Table2 on t1.ForeignKey equals t2.Id
+            select new { Table1 = t1, Table2 = t2 };
+
+            // Your DTO
+            public class MyDto
+            {
+                public int Table1Id { get; set; }
+                public int Table2Id { get; set; }
+                // other properties
+            }
+
+            var fields = new[]
+            {
+                "Table1.Id as Table1Id",
+                "Table2.Id as Table2Id",
+                // add more as needed: "Table1.Name as Table1Name", ...
+            };
+
+            var result = await query.SelectDynamicAsTypeWithAliasAsync<MyDto>(fields);
+            */
         }
     }
 }
